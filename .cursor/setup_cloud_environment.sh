@@ -127,15 +127,6 @@ print("pyquaternion import ok")
 PY
 }
 
-refresh_preprocess_pip_dependencies() {
-  # No-op by default. Older worktrees may resume from a stale environment that
-  # predates the switch to conda-forge packages, so we keep a cleanup hook.
-  if "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip show nuscenes-devkit >/dev/null 2>&1; then
-    log "Removing stale pip-installed nuScenes packages from $PREPROCESS_ENV_NAME"
-    "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip uninstall -y nuscenes-devkit pyquaternion || true
-  fi
-}
-
 recreate_environment() {
   local env_name=$1
 
@@ -156,12 +147,10 @@ verify_main_environment
 
 if [[ "$AUTOVLA_INSTALL_NUSC_PREPROCESS" == "1" ]]; then
   create_or_update_environment "$PREPROCESS_ENV_FILE" "$PREPROCESS_ENV_NAME"
-  refresh_preprocess_pip_dependencies
   if ! verify_preprocess_environment; then
     warn "Preprocess environment verification failed; rebuilding $PREPROCESS_ENV_NAME from scratch."
     recreate_environment "$PREPROCESS_ENV_NAME"
     create_or_update_environment "$PREPROCESS_ENV_FILE" "$PREPROCESS_ENV_NAME"
-    refresh_preprocess_pip_dependencies
     verify_preprocess_environment
   fi
 else
