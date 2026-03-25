@@ -128,9 +128,21 @@ PY
 }
 
 refresh_preprocess_pip_dependencies() {
-  log "Refreshing pip dependencies for $PREPROCESS_ENV_NAME"
-  "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip install --upgrade --no-deps "numpy<2"
-  "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip install --upgrade --no-deps "nuscenes-devkit==1.1.11" pyquaternion
+  # No-op by default. Older worktrees may resume from a stale environment that
+  # predates the switch to conda-forge packages, so we keep a cleanup hook.
+  if "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip show nuscenes-devkit >/dev/null 2>&1; then
+    log "Removing stale pip-installed nuScenes packages from $PREPROCESS_ENV_NAME"
+    "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip uninstall -y nuscenes-devkit pyquaternion || true
+  fi
+}
+
+recreate_environment() {
+  local env_name=$1
+
+  if [[ -d "$MAMBA_ROOT_PREFIX/envs/$env_name" ]]; then
+    log "Recreating micromamba environment: $env_name"
+    "$MICROMAMBA_BIN" remove -y -n "$env_name" --all
+  fi
 }
 
 install_micromamba
@@ -145,7 +157,13 @@ verify_main_environment
 if [[ "$AUTOVLA_INSTALL_NUSC_PREPROCESS" == "1" ]]; then
   create_or_update_environment "$PREPROCESS_ENV_FILE" "$PREPROCESS_ENV_NAME"
   refresh_preprocess_pip_dependencies
-  verify_preprocess_environment
+  if ! verify_preprocess_environment; then
+    warn "Preprocess environment verification failed; rebuilding $PREPROCESS_ENV_NAME from scratch."
+    recreate_environment "$PREPROCESS_ENV_NAME"
+    create_or_update_environment "$PREPROCESS_ENV_FILE" "$PREPROCESS_ENV_NAME"
+    refresh_preprocess_pip_dependencies
+    verify_preprocess_environment
+  fi
 else
   warn "Skipping $PREPROCESS_ENV_NAME. Re-run with AUTOVLA_INSTALL_NUSC_PREPROCESS=1 to install it."
 fi
