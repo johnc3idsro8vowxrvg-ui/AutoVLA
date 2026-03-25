@@ -62,10 +62,17 @@ The nuScenes dataset can be downloaded from the official website: [https://www.n
 You can perform the following command to create a conda environment and install the required dependencies.
 ```bash
 conda env create -f environment.yml
-conda activate autovla
+conda activate autovla_codeclean
 pip install -e . --no-warn-conflicts
 bash install.sh
 ```
+
+If you are using Cursor Cloud Agents, this repository also ships a repo-level environment bootstrap:
+```bash
+bash .cursor/setup_cloud_environment.sh
+source .cursor/activate_autovla.sh
+```
+Set `AUTOVLA_INSTALL_NUSC_PREPROCESS=1` before running the setup script if you also want the separate nuScenes preprocessing environment installed automatically.
 
 ### 3. Navsim Setup
 We have included the navsim code in this repo, and you can go to the `navsim` folder to install it. You can also refer to [here](https://github.com/autonomousvision/navsim/blob/v2.0/docs/install.md) to set up the navsim devkit, but please ensure version compatibility for the dependencies.
@@ -78,7 +85,7 @@ Remember to set the navsim required environment variables:
 export NUPLAN_MAP_VERSION="nuplan-maps-v1.0"
 export NUPLAN_MAPS_ROOT="$HOME/navsim_workspace/dataset/maps"
 export NAVSIM_EXP_ROOT="$HOME/navsim_workspace/exp"
-export NAVSIM_DEVKIT_ROOT="$HOME/navsim_workspace/navsim"
+export NAVSIM_DEVKIT_ROOT="$(pwd)/navsim"
 export OPENSCENE_DATA_ROOT="$HOME/navsim_workspace/dataset"
 ```
 
@@ -116,7 +123,7 @@ You can download the DriveLM nuScenes annotations (`v1_1_train_nus.json`) from [
 ```bash
 # Create a separate environment for nuScenes preprocessing
 conda env create -f environment_nusc_preprocess.yml
-conda activate nusc_preprocess
+conda activate autovla_nusc_preprocess
 
 # Run preprocessing
 bash scripts/run_nuscenes_preprocessing.sh \
@@ -125,7 +132,7 @@ bash scripts/run_nuscenes_preprocessing.sh \
     --drivelm_path /path/to/drivelm/v1_1_train_nus.json
 
 # Switch back to the main environment when done
-conda activate autovla
+conda activate autovla_codeclean
 ```
 
 ### 2. Action Codebook Creation
@@ -160,6 +167,7 @@ bash scripts/run_rft.sh
 #### nuPlan Evaluation (Navsim)
 We leverage Navsim and its Predictive Driver Model Score (PDMS) to test and evaluate our model on nuPlan. You need to set up the dataset path and split in the evaluation bash, and run the command to launch the testing.
 ```bash
+# Set CHECKPOINT, SENSOR_DATA_PATH, JSON_DATA_PATH, and CACHE_PATH first.
 bash navsim/scripts/evaluation/run_autovla_agent_pdm_score_evaluation.sh
 ```
 

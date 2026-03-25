@@ -2,12 +2,16 @@
 **/__pycache__/
 .pytest_cache/*
 .pydevproject
+.mypy_cache/*
 
 # IDE
 .vscode/*
+.cursor/.env
+.cursor/*.local.json
 
 # Pip
 *.egg-info
+.venv/
 
 # files
 *.log
@@ -19,3 +23,7 @@
 
 # temp
 temp/*
+
+# Local runtime caches
+.local/
+.cache/

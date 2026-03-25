@@ -1,0 +1,4 @@
+{
+  "name": "AutoVLA",
+  "install": "bash .cursor/setup_cloud_environment.sh"
+}
