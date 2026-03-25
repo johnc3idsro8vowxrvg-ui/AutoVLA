@@ -129,10 +129,12 @@ PY
 
 recreate_environment() {
   local env_name=$1
+  local env_dir="$MAMBA_ROOT_PREFIX/envs/$env_name"
 
-  if [[ -d "$MAMBA_ROOT_PREFIX/envs/$env_name" ]]; then
+  if [[ -d "$env_dir" ]]; then
     log "Recreating micromamba environment: $env_name"
     "$MICROMAMBA_BIN" remove -y -n "$env_name" --all
+    rm -rf "$env_dir"
   fi
 }
 
