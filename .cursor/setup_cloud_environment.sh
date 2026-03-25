@@ -127,6 +127,12 @@ print("pyquaternion import ok")
 PY
 }
 
+refresh_preprocess_pip_dependencies() {
+  log "Refreshing pip dependencies for $PREPROCESS_ENV_NAME"
+  "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip install --upgrade --no-deps "numpy<2"
+  "$MICROMAMBA_BIN" run -n "$PREPROCESS_ENV_NAME" python -m pip install --upgrade --no-deps "nuscenes-devkit==1.1.11" pyquaternion
+}
+
 install_micromamba
 export MAMBA_ROOT_PREFIX
 
@@ -138,6 +144,7 @@ verify_main_environment
 
 if [[ "$AUTOVLA_INSTALL_NUSC_PREPROCESS" == "1" ]]; then
   create_or_update_environment "$PREPROCESS_ENV_FILE" "$PREPROCESS_ENV_NAME"
+  refresh_preprocess_pip_dependencies
   verify_preprocess_environment
 else
   warn "Skipping $PREPROCESS_ENV_NAME. Re-run with AUTOVLA_INSTALL_NUSC_PREPROCESS=1 to install it."

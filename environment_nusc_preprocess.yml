@@ -7,5 +7,7 @@ dependencies:
   - pip
   - numpy<2
   - tqdm
-  - nuscenes-devkit=1.1.11
-  - pyquaternion
+  - pip:
+    - numpy<2
+    - nuscenes-devkit==1.1.11
+    - pyquaternion
